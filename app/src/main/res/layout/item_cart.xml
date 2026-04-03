@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- THÊM THẺ LAYOUT Ở ĐÂY -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <!-- Khai báo biến để sau này bind dữ liệu cho nhanh -->
+        <variable
+            name="cartItem"
+            type="com.example.baitapnhom.model.CartItem" />
+    </data>
+
+    <!-- GIỮ NGUYÊN CARDVIEW CỦA BẠN -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginVertical="5dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <!-- Giữ nguyên toàn bộ nội dung bên trong ... -->
+            <CheckBox
+                android:id="@+id/cbSelect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <!-- Các thành phần khác giữ nguyên -->
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</layout>
