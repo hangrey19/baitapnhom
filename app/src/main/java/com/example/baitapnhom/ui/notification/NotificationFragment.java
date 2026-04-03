@@ -5,14 +5,16 @@ import android.view.*;
 import androidx.annotation.*;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.example.baitapnhom.ShoppingApplication;
-import com.example.baitapnhom.FragmentNotificationBinding;
+import com.example.baitapnhom.databinding.FragmentNotificationBinding;
 
 public class NotificationFragment extends Fragment {
 
     private FragmentNotificationBinding b;
 
-    @Nullable @Override
+    @Nullable
+    @Override
     public View onCreateView(@NonNull LayoutInflater inf, ViewGroup c, Bundle s) {
         b = FragmentNotificationBinding.inflate(inf, c, false);
         return b.getRoot();
@@ -31,14 +33,22 @@ public class NotificationFragment extends Fragment {
         b.rvNotifications.setAdapter(adapter);
         b.rvNotifications.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        b.btnMarkAll.setOnClickListener(v -> app.getNotificationRepository().markAllAsRead(userId));
+        b.btnMarkAll.setOnClickListener(v ->
+                app.getNotificationRepository().markAllAsRead(userId));
 
-        app.getNotificationRepository().getNotifications(userId)
+        app.getNotificationRepository()
+                .getNotifications(userId)
                 .observe(getViewLifecycleOwner(), list -> {
                     adapter.submitList(list);
-                    b.tvEmpty.setVisibility(list == null || list.isEmpty() ? View.VISIBLE : View.GONE);
+                    b.tvEmpty.setVisibility(list == null || list.isEmpty()
+                            ? View.VISIBLE
+                            : View.GONE);
                 });
     }
 
-    @Override public void onDestroyView() { super.onDestroyView(); b = null; }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        b = null;
+    }
 }
