@@ -1,3 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BaiTapNhom</string>
+    <string name="app_name">ShopApp</string>
+
+    <!-- Auth -->
+    <string name="login">Đăng nhập</string>
+    <string name="register">Đăng ký</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="username">Tên đăng nhập</string>
+    <string name="password">Mật khẩu</string>
+    <string name="confirm_password">Xác nhận mật khẩu</string>
+    <string name="email">Email</string>
+    <string name="phone">Số điện thoại</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="no_account">Chưa có tài khoản? Đăng ký</string>
+    <string name="have_account">Đã có tài khoản? Đăng nhập</string>
+
+    <!-- Home -->
+    <string name="flash_sale">Flash Sale ⚡</string>
+    <string name="featured">Sản phẩm nổi bật</string>
+    <string name="see_all">Xem tất cả</string>
+    <string name="search_hint">Tìm kiếm sản phẩm…</string>
+    <string name="categories">Danh mục</string>
+
+    <!-- Product -->
+    <string name="add_to_cart">Thêm vào giỏ</string>
+    <string name="buy_now">Mua ngay</string>
+    <string name="in_stock">Còn hàng</string>
+    <string name="out_of_stock">Hết hàng</string>
+    <string name="description">Mô tả sản phẩm</string>
+    <string name="reviews">Đánh giá</string>
+    <string name="write_review">Viết đánh giá</string>
+    <string name="sold">Đã bán</string>
+
+    <!-- Cart -->
+    <string name="cart">Giỏ hàng</string>
+    <string name="checkout">Thanh toán</string>
+    <string name="total">Tổng cộng</string>
+    <string name="cart_empty">Giỏ hàng trống</string>
+    <string name="select_all">Tất cả</string>
+
+    <!-- Order -->
+    <string name="order_history">Đơn hàng</string>
+    <string name="shipping_address">Địa chỉ giao hàng</string>
+    <string name="payment_method">Phương thức thanh toán</string>
+    <string name="cod">💵 Thanh toán khi nhận hàng (COD)</string>
+    <string name="bank_transfer">🏦 Chuyển khoản ngân hàng</string>
+    <string name="momo">🌸 Ví MoMo</string>
+    <string name="zalopay">🔵 ZaloPay</string>
+    <string name="place_order">Đặt hàng</string>
+    <string name="order_success">Đặt hàng thành công!</string>
+    <string name="cancel_order">Hủy đơn</string>
+
+    <!-- Profile -->
+    <string name="profile">Tài khoản</string>
+    <string name="my_orders">Đơn hàng của tôi</string>
+    <string name="my_wishlist">Yêu thích</string>
+    <string name="dark_mode">Chế độ tối</string>
+    <string name="settings">Cài đặt</string>
+
+    <!-- Notification -->
+    <string name="notifications">Thông báo</string>
+    <string name="mark_all_read">Đánh dấu đã đọc</string>
+    <string name="no_notifications">Chưa có thông báo</string>
+
+    <!-- Wishlist -->
+    <string name="wishlist">Yêu thích</string>
+    <string name="wishlist_empty">Chưa có sản phẩm yêu thích</string>
+
+    <!-- Common -->
+    <string name="loading">Đang tải…</string>
+    <string name="error_generic">Có lỗi xảy ra, vui lòng thử lại</string>
+    <string name="please_login">Vui lòng đăng nhập</string>
+    <string name="go_login">Đăng nhập ngay</string>
+    <string name="cancel">Hủy</string>
+    <string name="confirm">Xác nhận</string>
+    <string name="save">Lưu</string>
+    <string name="note">Ghi chú</string>
+    <string name="tagline">Mua sắm thông minh 🛍️</string>
+    <string name="back_home">Về trang chủ</string>
+    <string name="view_orders">Xem đơn hàng</string>
 </resources>
