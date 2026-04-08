@@ -9,4 +9,5 @@ public class OrderItemDisplay {
     public String unit;
     public int quantity;
     public double unitPrice;
+    public boolean selected; // thêm mới
 }

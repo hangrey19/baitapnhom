@@ -54,4 +54,19 @@ public class OrderViewModel extends ViewModel {
     public void getPendingOrderId(int userId, OrderRepository.ActionCallback callback) {
         repository.getPendingOrderId(userId, callback);
     }
+
+    public LiveData<Integer> getCartItemCount(int userId) {
+        return repository.getCartItemCount(userId);
+    }
+    public void getLastPaidOrderId(int userId, java.util.function.Consumer<Integer> callback) {
+        repository.getLastPaidOrderId(userId, callback);
+    }
+
+    public void setItemSelected(int detailId, boolean selected) {
+        repository.setItemSelected(detailId, selected);
+    }
+
+    public void setAllSelected(int orderId, boolean selected) {
+        repository.setAllSelected(orderId, selected);
+    }
 }

@@ -32,4 +32,13 @@ public interface OrderDao {
 
     @Query("SELECT * FROM orders WHERE id = :orderId LIMIT 1")
     LiveData<Order> observeById(int orderId);
+
+    @Query("SELECT COALESCE(SUM(od.quantity), 0) " +
+            "FROM orders o " +
+            "INNER JOIN order_details od ON o.id = od.orderId " +
+            "WHERE o.userId = :userId AND o.status = 'PENDING'")
+    LiveData<Integer> getCartItemCount(int userId);
+
+    @Query("SELECT id FROM orders WHERE userId = :userId AND status = 'PAID' ORDER BY createdAt DESC LIMIT 1")
+    int getLastPaidOrderId(int userId);
 }

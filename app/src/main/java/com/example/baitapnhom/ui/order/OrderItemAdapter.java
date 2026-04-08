@@ -16,10 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.OrderItemViewHolder> {
+
     public interface CartActionListener {
         void onIncrease(OrderItemDisplay item);
         void onDecrease(OrderItemDisplay item);
         void onRemove(OrderItemDisplay item);
+        void onSelectChanged(OrderItemDisplay item, boolean selected);
     }
 
     private final List<OrderItemDisplay> items = new ArrayList<>();
@@ -31,22 +33,46 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
     }
 
     public OrderItemAdapter(boolean editable, CartActionListener actionListener) {
-        this.editable = editable;
+        this.editable       = editable;
         this.actionListener = actionListener;
     }
 
     public void submitList(List<OrderItemDisplay> list) {
         items.clear();
-        if (list != null) {
-            items.addAll(list);
-        }
+        if (list != null) items.addAll(list);
         notifyDataSetChanged();
+    }
+
+    /** Trả về tổng tiền các item đang được chọn */
+    public double getSelectedTotal() {
+        double total = 0;
+        for (OrderItemDisplay item : items) {
+            if (item.selected) total += item.unitPrice * item.quantity;
+        }
+        return total;
+    }
+
+    /** Trả về số lượng item đang được chọn */
+    public int getSelectedCount() {
+        int count = 0;
+        for (OrderItemDisplay item : items) {
+            if (item.selected) count++;
+        }
+        return count;
+    }
+
+    public boolean isAllSelected() {
+        for (OrderItemDisplay item : items) {
+            if (!item.selected) return false;
+        }
+        return !items.isEmpty();
     }
 
     @NonNull
     @Override
     public OrderItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new OrderItemViewHolder(ItemOrderDetailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+        return new OrderItemViewHolder(ItemOrderDetailBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false));
     }
 
     @Override
@@ -55,9 +81,7 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
     }
 
     @Override
-    public int getItemCount() {
-        return items.size();
-    }
+    public int getItemCount() { return items.size(); }
 
     class OrderItemViewHolder extends RecyclerView.ViewHolder {
         private final ItemOrderDetailBinding binding;
@@ -69,20 +93,37 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
 
         void bind(OrderItemDisplay item) {
             binding.tvName.setText(item.productName);
-            binding.tvQuantity.setText(editable ? "So luong trong gio: " + item.quantity : "SL: " + item.quantity);
+            binding.tvUnit.setText(item.unit + " | " + CurrencyUtils.format(item.unitPrice) + "/đơn vị");
+            binding.tvQuantity.setText("Số lượng: " + item.quantity);
             binding.tvPrice.setText(CurrencyUtils.format(item.unitPrice * item.quantity));
-            binding.tvUnit.setText("Don vi: " + item.unit + " | Gia: " + CurrencyUtils.format(item.unitPrice));
-            binding.layoutActions.setVisibility(editable ? View.VISIBLE : View.GONE);
             ImageLoader.load(binding.ivProduct, item.imageUrl);
 
-            if (editable && actionListener != null) {
-                binding.btnIncrease.setOnClickListener(v -> actionListener.onIncrease(item));
-                binding.btnDecrease.setOnClickListener(v -> actionListener.onDecrease(item));
-                binding.btnRemove.setOnClickListener(v -> actionListener.onRemove(item));
+            if (editable) {
+                // Hiện checkbox
+                binding.cbSelected.setVisibility(View.VISIBLE);
+                binding.layoutActions.setVisibility(View.VISIBLE);
+                binding.tvQtyNumber.setText(String.valueOf(item.quantity));
+
+                // Gán checkbox (tạm remove listener tránh vòng lặp)
+                binding.cbSelected.setOnCheckedChangeListener(null);
+                binding.cbSelected.setChecked(item.selected);
+                binding.cbSelected.setOnCheckedChangeListener((btn, checked) -> {
+                    item.selected = checked;
+                    if (actionListener != null) actionListener.onSelectChanged(item, checked);
+                });
+
+                binding.btnIncrease.setOnClickListener(v -> {
+                    if (actionListener != null) actionListener.onIncrease(item);
+                });
+                binding.btnDecrease.setOnClickListener(v -> {
+                    if (actionListener != null) actionListener.onDecrease(item);
+                });
+                binding.btnRemove.setOnClickListener(v -> {
+                    if (actionListener != null) actionListener.onRemove(item);
+                });
             } else {
-                binding.btnIncrease.setOnClickListener(null);
-                binding.btnDecrease.setOnClickListener(null);
-                binding.btnRemove.setOnClickListener(null);
+                binding.cbSelected.setVisibility(View.GONE);
+                binding.layoutActions.setVisibility(View.GONE);
             }
         }
     }

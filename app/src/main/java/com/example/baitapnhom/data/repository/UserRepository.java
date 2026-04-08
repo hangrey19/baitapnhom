@@ -21,63 +21,68 @@ public class UserRepository {
 
     public void login(String username, String password, UserCallback callback) {
         AppExecutors.diskIO().execute(() -> {
-            String safeUsername = username == null ? "" : username.trim();
-            String safePassword = password == null ? "" : password.trim();
-            if (safeUsername.isBlank() || safePassword.isBlank()) {
-                AppExecutors.mainThread().execute(() -> callback.onResult(null, "Vui long nhap day du thong tin"));
+            String u = username == null ? "" : username.trim();
+            String p = password == null ? "" : password.trim();
+            if (u.isBlank() || p.isBlank()) {
+                AppExecutors.mainThread().execute(() ->
+                        callback.onResult(null, "Vui lòng nhập đầy đủ thông tin"));
                 return;
             }
-
-            User user = userDao.login(safeUsername, safePassword);
+            User user = userDao.login(u, p);
             AppExecutors.mainThread().execute(() -> {
-                if (user != null) {
-                    callback.onResult(user, null);
-                } else {
-                    callback.onResult(null, "Sai tai khoan hoac mat khau");
-                }
+                if (user != null) callback.onResult(user, null);
+                else callback.onResult(null, "Sai tài khoản hoặc mật khẩu");
             });
         });
     }
 
-    public void register(String fullName, String username, String password, String phone, SimpleCallback callback) {
+    public void register(String fullName, String username, String password,
+                         String phone, SimpleCallback callback) {
         AppExecutors.diskIO().execute(() -> {
-            String safeFullName = fullName == null ? "" : fullName.trim();
-            String safeUsername = username == null ? "" : username.trim();
-            String safePassword = password == null ? "" : password.trim();
-            String safePhone = phone == null ? "" : phone.trim();
+            String fn = fullName  == null ? "" : fullName.trim();
+            String u  = username  == null ? "" : username.trim();
+            String p  = password  == null ? "" : password.trim();
+            String ph = phone     == null ? "" : phone.trim();
 
-            if (safeFullName.length() < 3) {
-                AppExecutors.mainThread().execute(() -> callback.onComplete(false, "Ho ten khong hop le"));
-                return;
+            if (fn.length() < 3) {
+                AppExecutors.mainThread().execute(() -> callback.onComplete(false, "Họ tên không hợp lệ")); return;
             }
-            if (safeUsername.length() < 4 || safeUsername.contains(" ")) {
-                AppExecutors.mainThread().execute(() -> callback.onComplete(false, "Username khong hop le"));
-                return;
+            if (u.length() < 4 || u.contains(" ")) {
+                AppExecutors.mainThread().execute(() -> callback.onComplete(false, "Username không hợp lệ")); return;
             }
-            if (!safePhone.matches("\\d{10,11}")) {
-                AppExecutors.mainThread().execute(() -> callback.onComplete(false, "So dien thoai khong hop le"));
-                return;
+            if (!ph.matches("\\d{10,11}")) {
+                AppExecutors.mainThread().execute(() -> callback.onComplete(false, "Số điện thoại không hợp lệ")); return;
             }
-            if (safePassword.length() < 6) {
-                AppExecutors.mainThread().execute(() -> callback.onComplete(false, "Mat khau qua ngan"));
-                return;
+            if (p.length() < 6) {
+                AppExecutors.mainThread().execute(() -> callback.onComplete(false, "Mật khẩu quá ngắn")); return;
             }
-
-            User existing = userDao.findByUsername(safeUsername);
-            if (existing != null) {
-                AppExecutors.mainThread().execute(() -> callback.onComplete(false, "Ten dang nhap da ton tai"));
-                return;
+            if (userDao.findByUsername(u) != null) {
+                AppExecutors.mainThread().execute(() -> callback.onComplete(false, "Tên đăng nhập đã tồn tại")); return;
             }
-
-            userDao.insert(new User(safeFullName, safeUsername, safePassword, safePhone));
-            AppExecutors.mainThread().execute(() -> callback.onComplete(true, "Dang ky thanh cong"));
+            userDao.insert(new User(fn, u, p, ph));
+            AppExecutors.mainThread().execute(() -> callback.onComplete(true, "Đăng ký thành công"));
         });
     }
 
     public void getById(int id, UserCallback callback) {
         AppExecutors.diskIO().execute(() -> {
             User user = userDao.findById(id);
-            AppExecutors.mainThread().execute(() -> callback.onResult(user, user == null ? "Khong tim thay nguoi dung" : null));
+            AppExecutors.mainThread().execute(() ->
+                    callback.onResult(user, user == null ? "Không tìm thấy người dùng" : null));
+        });
+    }
+
+    public void updateAddress(int userId, String address, SimpleCallback callback) {
+        AppExecutors.diskIO().execute(() -> {
+            String addr = address == null ? "" : address.trim();
+            if (addr.isEmpty()) {
+                AppExecutors.mainThread().execute(() ->
+                        callback.onComplete(false, "Địa chỉ không được để trống"));
+                return;
+            }
+            userDao.updateAddress(userId, addr);
+            AppExecutors.mainThread().execute(() ->
+                    callback.onComplete(true, "Đã lưu địa chỉ"));
         });
     }
 }

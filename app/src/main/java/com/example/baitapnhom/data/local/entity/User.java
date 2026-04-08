@@ -12,11 +12,13 @@ public class User {
     public String username;
     public String password;
     public String phone;
+    public String address; // thêm mới
 
     public User(String fullName, String username, String password, String phone) {
         this.fullName = fullName;
         this.username = username;
         this.password = password;
-        this.phone = phone;
+        this.phone    = phone;
+        this.address  = null;
     }
 }

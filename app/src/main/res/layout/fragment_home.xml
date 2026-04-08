@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="#F6F8F3">
 
-    <!-- ── Header  -->
+    <!-- ── Header ─────────────────────────────────────────────── -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
-    <!-- ── Bộ lọc  -->
+    <!-- ── Bộ lọc ──────────────────────────────────────────────── -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -155,7 +155,7 @@
             app:trackColorInactive="#C8E6C9"/>
     </LinearLayout>
 
-    <!-- ── Số kết quả  -->
+    <!-- ── Số kết quả ─────────────────────────────────────────── -->
     <TextView
         android:id="@+id/tvResultCount"
         android:layout_width="match_parent"
@@ -166,7 +166,7 @@
         android:textColor="#888888"
         android:textSize="13sp"/>
 
-    <!-- ── Empty state -->
+    <!-- ── Empty state ────────────────────────────────────────── -->
     <TextView
         android:id="@+id/tvEmpty"
         android:layout_width="match_parent"

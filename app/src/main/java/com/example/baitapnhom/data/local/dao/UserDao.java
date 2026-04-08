@@ -9,6 +9,7 @@ import com.example.baitapnhom.data.local.entity.User;
 
 @Dao
 public interface UserDao {
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     long insert(User user);
 
@@ -20,4 +21,7 @@ public interface UserDao {
 
     @Query("SELECT * FROM users WHERE username = :username LIMIT 1")
     User findByUsername(String username);
+
+    @Query("UPDATE users SET address = :address WHERE id = :userId")
+    void updateAddress(int userId, String address);
 }

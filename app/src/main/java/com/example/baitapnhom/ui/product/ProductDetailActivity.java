@@ -19,10 +19,12 @@ import com.example.baitapnhom.utils.ImageLoader;
 import com.example.baitapnhom.utils.SnackbarUtils;
 
 public class ProductDetailActivity extends AppCompatActivity {
+
     private ActivityProductDetailBinding binding;
     private OrderViewModel orderViewModel;
-    private PreferencesManager preferencesManager;
+    private PreferencesManager prefs;
     private int productId = -1;
+    private boolean canBuy = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,12 +34,12 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         productId = getIntent().getIntExtra("product_id", -1);
         if (productId == -1) {
-            SnackbarUtils.show(this, "San pham khong hop le");
+            SnackbarUtils.showError(this, "Sản phẩm không hợp lệ");
             finish();
             return;
         }
 
-        preferencesManager = ((FruitApplication) getApplication()).getPreferencesManager();
+        prefs = ((FruitApplication) getApplication()).getPreferencesManager();
 
         ProductDetailViewModel viewModel = new ViewModelProvider(this,
                 new ProductDetailViewModelFactory((FruitApplication) getApplication()))
@@ -48,12 +50,11 @@ public class ProductDetailActivity extends AppCompatActivity {
                 .get(OrderViewModel.class);
 
         binding.btnBack.setOnClickListener(v -> finish());
-        binding.btnViewCart.setOnClickListener(v -> openCartOrLogin());
 
         viewModel.load(productId);
         viewModel.getProduct().observe(this, product -> {
             if (product == null) {
-                SnackbarUtils.show(this, "San pham da het han hoac khong con ton tai");
+                SnackbarUtils.showError(this, "Sản phẩm đã hết hạn hoặc không còn tồn tại");
                 finish();
                 return;
             }
@@ -61,37 +62,55 @@ public class ProductDetailActivity extends AppCompatActivity {
             binding.tvName.setText(product.name);
             binding.tvDescription.setText(product.description);
             binding.tvPrice.setText(CurrencyUtils.format(product.price));
-            binding.tvUnit.setText("Ton kho: " + product.stock + " " + product.unit);
-            binding.tvExpiry.setText("Han dung: " + DateTimeUtils.formatIsoDate(product.expiryDate));
+            binding.tvUnit.setText(product.stock + " " + product.unit);
+            binding.tvExpiry.setText(DateTimeUtils.formatIsoDate(product.expiryDate));
             ImageLoader.load(binding.ivProduct, product.imageUrl);
 
-            boolean canAddToCart = product.stock > 0 && !DateTimeUtils.isExpired(product.expiryDate);
-            binding.btnAddToOrder.setEnabled(canAddToCart);
-            if (!canAddToCart) {
-                binding.btnAddToOrder.setText("San pham khong kha dung");
+            canBuy = product.stock > 0 && !DateTimeUtils.isExpired(product.expiryDate);
+            binding.btnAddToOrder.setEnabled(canBuy);
+            binding.btnBuyNow.setEnabled(canBuy);
+            if (!canBuy) {
+                binding.btnAddToOrder.setText("Hết hàng");
+                binding.btnBuyNow.setText("Hết hàng");
             }
         });
 
+        // Thêm vào giỏ hàng
         binding.btnAddToOrder.setOnClickListener(v -> {
-            if (!preferencesManager.isLoggedIn()) {
+            if (!prefs.isLoggedIn()) {
                 startActivity(new Intent(this, LoginActivity.class));
                 return;
             }
-            orderViewModel.addProduct(preferencesManager.getUserId(), productId);
+            orderViewModel.addProduct(prefs.getUserId(), productId);
         });
 
+        // Mua ngay: thêm vào giỏ rồi chuyển thẳng đến CheckoutActivity
+        binding.btnBuyNow.setOnClickListener(v -> {
+            if (!prefs.isLoggedIn()) {
+                startActivity(new Intent(this, LoginActivity.class));
+                return;
+            }
+            orderViewModel.addProduct(prefs.getUserId(), productId);
+            // Lắng nghe kết quả rồi chuyển sang checkout
+            orderViewModel.message.observe(this, msg -> {
+                orderViewModel.message.removeObservers(this);
+                if (msg != null) {
+                    // Dù thêm mới hay đã có trong giỏ → vẫn mở checkout
+                    startActivity(new Intent(this, CheckoutActivity.class));
+                }
+            });
+        });
+
+        // Hiện thông báo Snackbar khi thêm giỏ hàng
         orderViewModel.message.observe(this, msg -> {
             if (msg != null) {
-                SnackbarUtils.show(this, msg);
+                boolean isSuccess = msg.contains("thêm") || msg.contains("cập nhật");
+                if (isSuccess) {
+                    SnackbarUtils.showSuccess(binding.getRoot(), "✅ " + msg);
+                } else {
+                    SnackbarUtils.showError(binding.getRoot(), msg);
+                }
             }
         });
-    }
-
-    private void openCartOrLogin() {
-        if (!preferencesManager.isLoggedIn()) {
-            startActivity(new Intent(this, LoginActivity.class));
-            return;
-        }
-        startActivity(new Intent(this, CheckoutActivity.class));
     }
 }

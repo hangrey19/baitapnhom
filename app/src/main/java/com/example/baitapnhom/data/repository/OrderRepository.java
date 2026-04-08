@@ -71,20 +71,7 @@ public class OrderRepository {
         });
     }
 
-    private void updateOrderTotalInternal(int orderId) {
-        Order order = orderDao.findById(orderId);
-        if (order == null) {
-            return;
-        }
 
-        List<OrderItemDisplay> items = orderDetailDao.getDisplayItemsSync(orderId);
-        double total = 0;
-        for (OrderItemDisplay item : items) {
-            total += item.unitPrice * item.quantity;
-        }
-        order.totalAmount = total;
-        orderDao.update(order);
-    }
 
     public LiveData<Order> observeOrder(int orderId) {
         return orderDao.observeById(orderId);
@@ -143,55 +130,118 @@ public class OrderRepository {
         updateItemQuantity(detailId, 0, callback);
     }
 
-    public void checkout(int orderId, ActionCallback callback) {
-        AppExecutors.diskIO().execute(() -> {
-            Order order = orderDao.findById(orderId);
-            if (order == null) {
-                AppExecutors.mainThread().execute(() -> callback.onDone(false, "Khong tim thay gio hang", -1));
-                return;
-            }
 
-            List<OrderItemDisplay> items = orderDetailDao.getDisplayItemsSync(orderId);
-            if (items == null || items.isEmpty()) {
-                AppExecutors.mainThread().execute(() -> callback.onDone(false, "Gio hang dang trong", orderId));
-                return;
-            }
-
-            for (OrderItemDisplay item : items) {
-                Product product = productDao.getProductByIdSync(item.productId);
-                if (product == null) {
-                    AppExecutors.mainThread().execute(() -> callback.onDone(false, "Co san pham khong con ton tai", orderId));
-                    return;
-                }
-                if (DateTimeUtils.isExpired(product.expiryDate)) {
-                    AppExecutors.mainThread().execute(() -> callback.onDone(false, "Co san pham da het han trong gio", orderId));
-                    return;
-                }
-                if (product.stock < item.quantity) {
-                    AppExecutors.mainThread().execute(() -> callback.onDone(false, "Ton kho khong du cho " + item.productName, orderId));
-                    return;
-                }
-            }
-
-            for (OrderItemDisplay item : items) {
-                Product product = productDao.getProductByIdSync(item.productId);
-                product.stock = product.stock - item.quantity;
-                productDao.update(product);
-            }
-
-            updateOrderTotalInternal(orderId);
-            order = orderDao.findById(orderId);
-            order.status = "PAID";
-            orderDao.update(order);
-            AppExecutors.mainThread().execute(() -> callback.onDone(true, "Thanh toan thanh cong", orderId));
-        });
-    }
 
     public void getPendingOrderId(int userId, ActionCallback callback) {
         AppExecutors.diskIO().execute(() -> {
             Order order = orderDao.getPendingOrder(userId);
             int orderId = order != null ? order.id : -1;
             AppExecutors.mainThread().execute(() -> callback.onDone(order != null, order != null ? "OK" : "Chua co gio hang", orderId));
+        });
+    }
+    public LiveData<Integer> getCartItemCount(int userId) {
+        return orderDao.getCartItemCount(userId);
+    }
+
+    /** Chọn / bỏ chọn 1 item */
+    public void setItemSelected(int detailId, boolean selected) {
+        AppExecutors.diskIO().execute(() ->
+                orderDetailDao.updateSelected(detailId, selected));
+    }
+
+    /** Chọn / bỏ chọn tất cả item trong giỏ */
+    public void setAllSelected(int orderId, boolean selected) {
+        AppExecutors.diskIO().execute(() ->
+                orderDetailDao.updateAllSelected(orderId, selected));
+    }
+    public void getLastPaidOrderId(int userId, java.util.function.Consumer<Integer> callback) {
+        AppExecutors.diskIO().execute(() -> {
+            int id = orderDao.getLastPaidOrderId(userId);
+            AppExecutors.mainThread().execute(() -> callback.accept(id));
+        });
+    }
+
+    private void updateOrderTotalInternal(int orderId) {
+        Order order = orderDao.findById(orderId);
+        if (order == null) return;
+
+        List<OrderItemDisplay> items = orderDetailDao.getSelectedItemsSync(orderId);
+        double total = 0;
+        for (OrderItemDisplay item : items) {
+            total += item.unitPrice * item.quantity;
+        }
+        order.totalAmount = total;
+        orderDao.update(order);
+    }
+
+    public void checkout(int orderId, ActionCallback callback) {
+        AppExecutors.diskIO().execute(() -> {
+            Order order = orderDao.findById(orderId);
+            if (order == null) {
+                AppExecutors.mainThread().execute(() ->
+                        callback.onDone(false, "Không tìm thấy giỏ hàng", -1));
+                return;
+            }
+
+            List<OrderItemDisplay> selectedItems = orderDetailDao.getSelectedItemsSync(orderId);
+            if (selectedItems == null || selectedItems.isEmpty()) {
+                AppExecutors.mainThread().execute(() ->
+                        callback.onDone(false, "Chưa chọn sản phẩm nào để thanh toán", orderId));
+                return;
+            }
+
+            // Kiểm tra hợp lệ
+            for (OrderItemDisplay item : selectedItems) {
+                android.util.Log.d("OrderRepo", "Checking item: " + item.productName);
+                var product = productDao.getProductByIdSync(item.productId);
+                if (product == null) {
+                    AppExecutors.mainThread().execute(() ->
+                            callback.onDone(false, "Có sản phẩm không còn tồn tại", orderId));
+                    return;
+                }
+                if (com.example.baitapnhom.utils.DateTimeUtils.isExpired(product.expiryDate)) {
+                    AppExecutors.mainThread().execute(() ->
+                            callback.onDone(false, "Có sản phẩm đã hết hạn trong giỏ", orderId));
+                    return;
+                }
+                if (product.stock < item.quantity) {
+                    AppExecutors.mainThread().execute(() ->
+                            callback.onDone(false, "Tồn kho không đủ cho " + item.productName, orderId));
+                    return;
+                }
+            }
+
+            // Trừ tồn kho + xóa item đã thanh toán khỏi giỏ
+            for (OrderItemDisplay item : selectedItems) {
+                var product = productDao.getProductByIdSync(item.productId);
+                product.stock -= item.quantity;
+                productDao.update(product);
+                orderDetailDao.deleteById(item.detailId);
+            }
+
+            // Nếu còn item chưa chọn → giỏ vẫn PENDING, chỉ tạo đơn mới PAID
+            int remainCount = orderDetailDao.countByOrderId(orderId);
+
+            // Tạo đơn PAID riêng để lưu lịch sử
+            double total = 0;
+            for (OrderItemDisplay item : selectedItems) total += item.unitPrice * item.quantity;
+
+            Order paidOrder = new Order(order.userId, "PAID", total, System.currentTimeMillis());
+            long paidOrderId = orderDao.insert(paidOrder);
+
+            // Nếu giỏ rỗng → đóng đơn PENDING
+            if (remainCount == 0) {
+                order.status = "PAID";
+                order.totalAmount = total;
+                orderDao.update(order);
+            } else {
+                // Cập nhật lại tổng giỏ hàng còn lại
+                updateOrderTotalInternal(orderId);
+            }
+
+            long finalPaidId = paidOrderId;
+            AppExecutors.mainThread().execute(() ->
+                    callback.onDone(true, "Thanh toán thành công", (int) finalPaidId));
         });
     }
 }
