@@ -12,7 +12,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.baitapnhom">
         <activity
+            android:name=".ui.search.SearchActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.product.ProductListByCategoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.order.OrderHistoryActivity"
             android:exported="false" />
         <activity
             android:name=".ui.order.InvoiceActivity"
@@ -32,6 +38,7 @@
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="false" />
+
         <activity
             android:name=".ui.main.SplashActivity"
             android:exported="true"

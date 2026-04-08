@@ -1,5 +1,6 @@
 package com.example.baitapnhom.ui.main;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@ import com.example.baitapnhom.databinding.ActivityMainBinding;
 import com.example.baitapnhom.ui.category.CategoryFragment;
 import com.example.baitapnhom.ui.home.HomeFragment;
 import com.example.baitapnhom.ui.profile.ProfileFragment;
+import com.example.baitapnhom.ui.search.SearchActivity;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
@@ -29,9 +31,6 @@ public class MainActivity extends AppCompatActivity {
             int id = item.getItemId();
             if (id == R.id.menu_home) {
                 replaceFragment(new HomeFragment());
-                return true;
-            } else if (id == R.id.menu_category) {
-                replaceFragment(new CategoryFragment());
                 return true;
             } else if (id == R.id.menu_profile) {
                 replaceFragment(new ProfileFragment());

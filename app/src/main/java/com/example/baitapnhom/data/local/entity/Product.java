@@ -28,11 +28,12 @@ public class Product {
     public String imageUrl;
     public int categoryId;
     public String createdDate;
+    public String expiryDate;
     public boolean todaySale;
 
     public Product(String name, String description, double price, int stock,
                    String unit, String imageUrl, int categoryId,
-                   String createdDate, boolean todaySale) {
+                   String createdDate, String expiryDate, boolean todaySale) {
         this.name = name;
         this.description = description;
         this.price = price;
@@ -41,6 +42,7 @@ public class Product {
         this.imageUrl = imageUrl;
         this.categoryId = categoryId;
         this.createdDate = createdDate;
+        this.expiryDate = expiryDate;
         this.todaySale = todaySale;
     }
 }

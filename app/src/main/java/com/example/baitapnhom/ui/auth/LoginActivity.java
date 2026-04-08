@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.baitapnhom.FruitApplication;
 import com.example.baitapnhom.databinding.ActivityLoginBinding;
 import com.example.baitapnhom.ui.main.MainActivity;
-import com.example.baitapnhom.utils.ToastUtils;
+import com.example.baitapnhom.utils.SnackbarUtils;
 
 public class LoginActivity extends AppCompatActivity {
     private ActivityLoginBinding binding;
@@ -26,11 +26,19 @@ public class LoginActivity extends AppCompatActivity {
                 .get(AuthViewModel.class);
 
         binding.btnLogin.setOnClickListener(v -> {
-            String username = binding.etUsername.getText() == null ? "" : binding.etUsername.getText().toString();
-            String password = binding.etPassword.getText() == null ? "" : binding.etPassword.getText().toString();
+            clearErrors();
 
-            if (username.isBlank() || password.isBlank()) {
-                ToastUtils.show(this, "Vui lòng nhập đủ thông tin");
+            String username = text(binding.etUsername);
+            String password = text(binding.etPassword);
+
+            if (username.isBlank()) {
+                binding.tilUsername.setError("Username bat buoc");
+                binding.etUsername.requestFocus();
+                return;
+            }
+            if (password.isBlank()) {
+                binding.tilPassword.setError("Mat khau bat buoc");
+                binding.etPassword.requestFocus();
                 return;
             }
             viewModel.login(username, password);
@@ -40,7 +48,9 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(this, RegisterActivity.class)));
 
         viewModel.message.observe(this, msg -> {
-            if (msg != null) ToastUtils.show(this, msg);
+            if (msg != null) {
+                SnackbarUtils.show(this, msg);
+            }
         });
 
         viewModel.success.observe(this, ok -> {
@@ -49,5 +59,14 @@ public class LoginActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    private void clearErrors() {
+        binding.tilUsername.setError(null);
+        binding.tilPassword.setError(null);
+    }
+
+    private String text(android.widget.EditText editText) {
+        return editText.getText() == null ? "" : editText.getText().toString().trim();
     }
 }

@@ -14,8 +14,9 @@ import com.example.baitapnhom.ui.order.CheckoutActivity;
 import com.example.baitapnhom.ui.order.OrderViewModel;
 import com.example.baitapnhom.ui.order.OrderViewModelFactory;
 import com.example.baitapnhom.utils.CurrencyUtils;
+import com.example.baitapnhom.utils.DateTimeUtils;
 import com.example.baitapnhom.utils.ImageLoader;
-import com.example.baitapnhom.utils.ToastUtils;
+import com.example.baitapnhom.utils.SnackbarUtils;
 
 public class ProductDetailActivity extends AppCompatActivity {
     private ActivityProductDetailBinding binding;
@@ -30,6 +31,12 @@ public class ProductDetailActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         productId = getIntent().getIntExtra("product_id", -1);
+        if (productId == -1) {
+            SnackbarUtils.show(this, "San pham khong hop le");
+            finish();
+            return;
+        }
+
         preferencesManager = ((FruitApplication) getApplication()).getPreferencesManager();
 
         ProductDetailViewModel viewModel = new ViewModelProvider(this,
@@ -40,14 +47,29 @@ public class ProductDetailActivity extends AppCompatActivity {
                 new OrderViewModelFactory((FruitApplication) getApplication()))
                 .get(OrderViewModel.class);
 
+        binding.btnBack.setOnClickListener(v -> finish());
+        binding.btnViewCart.setOnClickListener(v -> openCartOrLogin());
+
         viewModel.load(productId);
         viewModel.getProduct().observe(this, product -> {
-            if (product == null) return;
+            if (product == null) {
+                SnackbarUtils.show(this, "San pham da het han hoac khong con ton tai");
+                finish();
+                return;
+            }
+
             binding.tvName.setText(product.name);
             binding.tvDescription.setText(product.description);
             binding.tvPrice.setText(CurrencyUtils.format(product.price));
-            binding.tvStock.setText("Kho: " + product.stock + " " + product.unit);
+            binding.tvUnit.setText("Ton kho: " + product.stock + " " + product.unit);
+            binding.tvExpiry.setText("Han dung: " + DateTimeUtils.formatIsoDate(product.expiryDate));
             ImageLoader.load(binding.ivProduct, product.imageUrl);
+
+            boolean canAddToCart = product.stock > 0 && !DateTimeUtils.isExpired(product.expiryDate);
+            binding.btnAddToOrder.setEnabled(canAddToCart);
+            if (!canAddToCart) {
+                binding.btnAddToOrder.setText("San pham khong kha dung");
+            }
         });
 
         binding.btnAddToOrder.setOnClickListener(v -> {
@@ -58,11 +80,18 @@ public class ProductDetailActivity extends AppCompatActivity {
             orderViewModel.addProduct(preferencesManager.getUserId(), productId);
         });
 
-        binding.btnCheckout.setOnClickListener(v ->
-                startActivity(new Intent(this, CheckoutActivity.class)));
-
         orderViewModel.message.observe(this, msg -> {
-            if (msg != null) ToastUtils.show(this, msg);
+            if (msg != null) {
+                SnackbarUtils.show(this, msg);
+            }
         });
+    }
+
+    private void openCartOrLogin() {
+        if (!preferencesManager.isLoggedIn()) {
+            startActivity(new Intent(this, LoginActivity.class));
+            return;
+        }
+        startActivity(new Intent(this, CheckoutActivity.class));
     }
 }

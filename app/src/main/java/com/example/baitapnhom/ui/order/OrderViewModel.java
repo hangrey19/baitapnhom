@@ -35,6 +35,18 @@ public class OrderViewModel extends ViewModel {
         return repository.getOrdersByUser(userId);
     }
 
+    public LiveData<List<Order>> getPurchaseHistoryByUser(int userId) {
+        return repository.getPurchaseHistoryByUser(userId);
+    }
+
+    public void updateItemQuantity(int detailId, int quantity) {
+        repository.updateItemQuantity(detailId, quantity, (success, message, orderId) -> this.message.setValue(message));
+    }
+
+    public void removeItem(int detailId) {
+        repository.removeItem(detailId, (success, message, orderId) -> this.message.setValue(message));
+    }
+
     public void checkout(int orderId) {
         repository.checkout(orderId, (success, message, id) -> this.message.setValue(message));
     }

@@ -24,6 +24,9 @@ public interface OrderDao {
     @Query("SELECT * FROM orders WHERE userId = :userId ORDER BY createdAt DESC")
     LiveData<List<Order>> getOrdersByUser(int userId);
 
+    @Query("SELECT * FROM orders WHERE userId = :userId AND status != 'PENDING' ORDER BY createdAt DESC")
+    LiveData<List<Order>> getPurchaseHistoryByUser(int userId);
+
     @Query("SELECT * FROM orders WHERE id = :orderId LIMIT 1")
     Order findById(int orderId);
 

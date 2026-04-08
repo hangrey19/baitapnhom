@@ -2,6 +2,7 @@ package com.example.baitapnhom.ui.product;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,7 +28,7 @@ public class ProductListByCategoryActivity extends AppCompatActivity {
         String categoryName = getIntent().getStringExtra(EXTRA_CATEGORY_NAME);
 
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(categoryName == null ? "Sản phẩm" : categoryName);
+            getSupportActionBar().setTitle(categoryName == null ? "San pham" : categoryName);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
@@ -45,7 +46,10 @@ public class ProductListByCategoryActivity extends AppCompatActivity {
         binding.rcvProducts.setAdapter(adapter);
 
         viewModel.loadByCategory(categoryId);
-        viewModel.getProducts().observe(this, adapter::submitList);
+        viewModel.getProducts().observe(this, products -> {
+            adapter.submitList(products);
+            binding.tvEmpty.setVisibility(products == null || products.isEmpty() ? View.VISIBLE : View.GONE);
+        });
     }
 
     @Override

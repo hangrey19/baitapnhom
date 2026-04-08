@@ -1,6 +1,7 @@
 package com.example.baitapnhom.ui.order;
 
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -15,11 +16,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.OrderItemViewHolder> {
+    public interface CartActionListener {
+        void onIncrease(OrderItemDisplay item);
+        void onDecrease(OrderItemDisplay item);
+        void onRemove(OrderItemDisplay item);
+    }
+
     private final List<OrderItemDisplay> items = new ArrayList<>();
+    private final boolean editable;
+    private final CartActionListener actionListener;
+
+    public OrderItemAdapter() {
+        this(false, null);
+    }
+
+    public OrderItemAdapter(boolean editable, CartActionListener actionListener) {
+        this.editable = editable;
+        this.actionListener = actionListener;
+    }
 
     public void submitList(List<OrderItemDisplay> list) {
         items.clear();
-        if (list != null) items.addAll(list);
+        if (list != null) {
+            items.addAll(list);
+        }
         notifyDataSetChanged();
     }
 
@@ -42,17 +62,28 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
     class OrderItemViewHolder extends RecyclerView.ViewHolder {
         private final ItemOrderDetailBinding binding;
 
-        public OrderItemViewHolder(ItemOrderDetailBinding binding) {
+        OrderItemViewHolder(ItemOrderDetailBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }
 
         void bind(OrderItemDisplay item) {
             binding.tvName.setText(item.productName);
-            binding.tvQuantity.setText("SL: " + item.quantity);
+            binding.tvQuantity.setText(editable ? "So luong trong gio: " + item.quantity : "SL: " + item.quantity);
             binding.tvPrice.setText(CurrencyUtils.format(item.unitPrice * item.quantity));
-            binding.tvUnit.setText(item.unit);
+            binding.tvUnit.setText("Don vi: " + item.unit + " | Gia: " + CurrencyUtils.format(item.unitPrice));
+            binding.layoutActions.setVisibility(editable ? View.VISIBLE : View.GONE);
             ImageLoader.load(binding.ivProduct, item.imageUrl);
+
+            if (editable && actionListener != null) {
+                binding.btnIncrease.setOnClickListener(v -> actionListener.onIncrease(item));
+                binding.btnDecrease.setOnClickListener(v -> actionListener.onDecrease(item));
+                binding.btnRemove.setOnClickListener(v -> actionListener.onRemove(item));
+            } else {
+                binding.btnIncrease.setOnClickListener(null);
+                binding.btnDecrease.setOnClickListener(null);
+                binding.btnRemove.setOnClickListener(null);
+            }
         }
     }
 }

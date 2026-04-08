@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.baitapnhom.data.local.entity.Product;
 import com.example.baitapnhom.databinding.ItemProductBinding;
 import com.example.baitapnhom.utils.CurrencyUtils;
+import com.example.baitapnhom.utils.DateTimeUtils;
 import com.example.baitapnhom.utils.ImageLoader;
 
 import java.util.ArrayList;
@@ -46,9 +47,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     }
 
     @Override
-    public int getItemCount() {
-        return items.size();
-    }
+    public int getItemCount() { return items.size(); }
 
     class ProductViewHolder extends RecyclerView.ViewHolder {
         private final ItemProductBinding binding;
@@ -59,8 +58,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         }
 
         void bind(Product product) {
-            binding.tvProductName.setText(product.name);
-            binding.tvProductPrice.setText(CurrencyUtils.format(product.price));
+            binding.tvName.setText(product.name);
+            binding.tvUnit.setText("Tồn kho: " + product.stock + " " + product.unit);
+            binding.tvExpiry.setText("HSD: " + DateTimeUtils.formatIsoDate(product.expiryDate));
+            binding.tvPrice.setText(CurrencyUtils.format(product.price));
             ImageLoader.load(binding.ivProduct, product.imageUrl);
             binding.getRoot().setOnClickListener(v -> listener.onClick(product));
         }

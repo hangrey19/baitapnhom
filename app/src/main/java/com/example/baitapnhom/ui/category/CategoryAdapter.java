@@ -11,6 +11,7 @@ import com.example.baitapnhom.databinding.ItemCategoryBinding;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
     public interface OnCategoryClickListener {
@@ -55,10 +56,31 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         }
 
         void bind(Category category) {
-            binding.tvIcon.setText(category.icon);
+            binding.tvIcon.setText(resolveCategoryIcon(category.icon));
             binding.tvName.setText(category.name);
             binding.tvDesc.setText(category.description);
             binding.getRoot().setOnClickListener(v -> listener.onClick(category));
+        }
+
+        private String resolveCategoryIcon(String icon) {
+            if (icon == null) {
+                return "\uD83C\uDF4E";
+            }
+
+            String normalized = icon.trim().toLowerCase(Locale.ROOT);
+            if (normalized.contains("apple") || normalized.contains("noi")) {
+                return "\uD83C\uDF4A";
+            }
+            if (normalized.contains("grape") || normalized.contains("nhap")) {
+                return "\uD83C\uDF47";
+            }
+            if (normalized.contains("juice")) {
+                return "\uD83E\uDD64";
+            }
+            if (normalized.contains("gift") || normalized.contains("combo")) {
+                return "\uD83C\uDF81";
+            }
+            return icon;
         }
     }
 }

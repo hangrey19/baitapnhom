@@ -22,6 +22,15 @@ public interface OrderDetailDao {
     @Query("SELECT * FROM order_details WHERE orderId = :orderId AND productId = :productId LIMIT 1")
     OrderDetail findByOrderAndProduct(int orderId, int productId);
 
+    @Query("SELECT * FROM order_details WHERE id = :detailId LIMIT 1")
+    OrderDetail findById(int detailId);
+
+    @Query("DELETE FROM order_details WHERE id = :detailId")
+    void deleteById(int detailId);
+
+    @Query("SELECT COUNT(*) FROM order_details WHERE orderId = :orderId")
+    int countByOrderId(int orderId);
+
     @Query("SELECT od.id AS detailId, od.orderId AS orderId, od.productId AS productId, p.name AS productName, p.imageUrl AS imageUrl, p.unit AS unit, od.quantity AS quantity, od.unitPrice AS unitPrice " +
             "FROM order_details od INNER JOIN products p ON od.productId = p.id WHERE od.orderId = :orderId ORDER BY od.id DESC")
     LiveData<List<OrderItemDisplay>> getDisplayItems(int orderId);
