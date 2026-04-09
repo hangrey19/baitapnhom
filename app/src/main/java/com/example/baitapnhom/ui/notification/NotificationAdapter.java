@@ -16,8 +16,13 @@ public class NotificationAdapter extends ListAdapter<Notification, NotificationA
 
     private static final DiffUtil.ItemCallback<Notification> DIFF =
             new DiffUtil.ItemCallback<Notification>() {
-                @Override public boolean areItemsTheSame(@NonNull Notification a, @NonNull Notification b)    { return a.id == b.id; }
-                @Override public boolean areContentsTheSame(@NonNull Notification a, @NonNull Notification b) { return a.isRead == b.isRead; }
+                @Override public boolean areItemsTheSame(@NonNull Notification a, @NonNull Notification b) {
+                    return a.id == b.id;
+                }
+
+                @Override public boolean areContentsTheSame(@NonNull Notification a, @NonNull Notification b) {
+                    return a.isRead == b.isRead;
+                }
             };
 
     public NotificationAdapter(OnNotifClick listener) {
@@ -25,24 +30,38 @@ public class NotificationAdapter extends ListAdapter<Notification, NotificationA
         this.listener = listener;
     }
 
-    @NonNull @Override
+    @NonNull
+    @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new VH(ItemNotificationBinding.inflate(
                 LayoutInflater.from(parent.getContext()), parent, false));
     }
 
-    @Override public void onBindViewHolder(@NonNull VH holder, int pos) { holder.bind(getItem(pos)); }
+    @Override
+    public void onBindViewHolder(@NonNull VH holder, int pos) {
+        holder.bind(getItem(pos));
+    }
 
     class VH extends RecyclerView.ViewHolder {
+
         final ItemNotificationBinding b;
-        VH(ItemNotificationBinding b) { super(b.getRoot()); this.b = b; }
+
+        VH(ItemNotificationBinding b) {
+            super(b.getRoot());
+            this.b = b;
+        }
+
         void bind(Notification n) {
             b.tvEmoji.setText(n.iconEmoji);
             b.tvTitle.setText(n.title);
             b.tvMessage.setText(n.message);
             b.tvDate.setText(DateFormatter.format(n.createdAt));
+
             b.getRoot().setAlpha(n.isRead ? 0.6f : 1f);
-            b.getRoot().setOnClickListener(v -> { if (listener != null) listener.onClick(n); });
+
+            b.getRoot().setOnClickListener(v -> {
+                if (listener != null) listener.onClick(n);
+            });
         }
     }
 }
