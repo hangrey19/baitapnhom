@@ -1,57 +1,46 @@
 package com.example.baitapnhom.data.local;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
-import androidx.room.*;
+import androidx.room.Database;
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
+import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
-import com.example.baitapnhom.data.local.dao.*;
-import com.example.baitapnhom.data.local.entity.*;
-import java.util.concurrent.ExecutorService;
+
+import com.example.baitapnhom.data.local.dao.UserDao;
+import com.example.baitapnhom.data.local.entity.User;
+
 import java.util.concurrent.Executors;
 
-@Database(
-        entities = {
-                User.class, Category.class, Product.class,
-                Order.class, OrderDetail.class, CartItem.class,
-                Wishlist.class, Review.class, Notification.class
-        },
-        version = 1,
-        exportSchema = false
-)
+@Database(entities = {User.class},
+        version = 4, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
+    private static volatile AppDatabase instance;
 
-    public abstract UserDao         userDao();
-    public abstract CategoryDao     categoryDao();
-    public abstract ProductDao      productDao();
-    public abstract OrderDao        orderDao();
-    public abstract OrderDetailDao  orderDetailDao();
-    public abstract CartItemDao     cartItemDao();
-    public abstract WishlistDao     wishlistDao();
-    public abstract ReviewDao       reviewDao();
-    public abstract NotificationDao notificationDao();
-
-    private static volatile AppDatabase INSTANCE;
-    static final ExecutorService dbExecutor = Executors.newFixedThreadPool(4);
-
-    public static AppDatabase getInstance(Context context) {
-        if (INSTANCE == null) {
-            synchronized (AppDatabase.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(
-                                    context.getApplicationContext(),
-                                    AppDatabase.class,
-                                    "shopping_db")
-                            .addCallback(new Callback() {
-                                @Override
-                                public void onCreate(@NonNull SupportSQLiteDatabase db) {
-                                    super.onCreate(db);
-                                    dbExecutor.execute(() -> SeedData.populate(INSTANCE));
-                                }
-                            })
-                            .build();
-                }
-            }
+    private static final Migration MIGRATION_1_2 = new Migration(1, 2) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE products ADD COLUMN expiryDate TEXT NOT NULL DEFAULT '2099-12-31'");
         }
-        return INSTANCE;
-    }
+    };
+
+    private static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE order_details ADD COLUMN selected INTEGER NOT NULL DEFAULT 1");
+        }
+    };
+
+    private static final Migration MIGRATION_3_4 = new Migration(3, 4) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE users ADD COLUMN address TEXT");
+        }
+    };
+
+    public abstract UserDao userDao();
+
+
 }
