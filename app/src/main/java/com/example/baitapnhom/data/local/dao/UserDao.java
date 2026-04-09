@@ -1,33 +1,27 @@
 package com.example.baitapnhom.data.local.dao;
 
-import androidx.lifecycle.LiveData;
-import androidx.room.*;
+import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
+import androidx.room.Query;
+
 import com.example.baitapnhom.data.local.entity.User;
-import java.util.List;
 
 @Dao
 public interface UserDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long insert(User user);
 
-    @Update
-    void update(User user);
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    long insert(User user);
 
     @Query("SELECT * FROM users WHERE username = :username AND password = :password LIMIT 1")
     User login(String username, String password);
 
     @Query("SELECT * FROM users WHERE id = :id LIMIT 1")
-    LiveData<User> getUserById(int id);
+    User findById(int id);
 
-    @Query("SELECT * FROM users WHERE id = :id LIMIT 1")
-    User getUserByIdSync(int id);
+    @Query("SELECT * FROM users WHERE username = :username LIMIT 1")
+    User findByUsername(String username);
 
-    @Query("SELECT COUNT(*) FROM users WHERE username = :username")
-    int isUsernameTaken(String username);
-
-    @Query("SELECT COUNT(*) FROM users WHERE email = :email")
-    int isEmailTaken(String email);
-
-    @Delete
-    void delete(User user);
+    @Query("UPDATE users SET address = :address WHERE id = :userId")
+    void updateAddress(int userId, String address);
 }
