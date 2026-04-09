@@ -1,64 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    tools:context=".MainActivity">
 
-    <!-- Toolbar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/green_700"
-        app:titleTextColor="#FFFFFF">
-
-        <!-- Badge giỏ hàng -->
-        <FrameLayout
-            android:id="@+id/btnCart"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="end"
-            android:layout_marginEnd="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackgroundBorderless">
-
-            <ImageView
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:layout_gravity="center"
-                android:src="@android:drawable/ic_menu_add"
-                android:tint="#FFFFFF"
-                android:contentDescription="Giỏ hàng" />
-
-            <!-- Badge số lượng -->
-            <TextView
-                android:id="@+id/tvCartBadge"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_gravity="top|end"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="4dp"
-                android:background="@drawable/bg_badge"
-                android:gravity="center"
-                android:textColor="#FFFFFF"
-                android:textSize="10sp"
-                android:textStyle="bold"
-                android:visibility="gone" />
-        </FrameLayout>
-    </androidx.appcompat.widget.Toolbar>
-
-    <FrameLayout
-        android:id="@+id/fragmentContainer"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
-        android:layout_width="match_parent"
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:menu="@menu/bottom_nav_menu" />
+        android:text="Hello World!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
